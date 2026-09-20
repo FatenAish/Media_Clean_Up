@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
 
-title Shutterstock Article Image Checker
+title Shutterstock Article Image Checker - Local V2
 
 set "REPO_ZIP=https://github.com/FatenAish/Media_Clean_Up/archive/refs/heads/main.zip"
 set "DESKTOP=%USERPROFILE%\Desktop"
@@ -12,7 +12,7 @@ set "SOURCE=%EXTRACT%\Media_Clean_Up-main"
 
 echo.
 echo ==========================================
-echo Shutterstock Article Image Checker
+echo Shutterstock Article Image Checker V2
 echo ==========================================
 echo.
 
@@ -38,7 +38,7 @@ for /f "tokens=5" %%P in ('netstat -ano ^| findstr ":8501" ^| findstr "LISTENING
 )
 timeout /t 2 /nobreak >nul
 
-echo [2/6] Downloading the latest GitHub project...
+echo [2/6] Downloading the latest GitHub V2 project...
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "try { Invoke-WebRequest -Uri '%REPO_ZIP%' -OutFile '%ZIPFILE%' -UseBasicParsing } catch { Write-Host $_.Exception.Message; exit 1 }"
 if errorlevel 1 (
@@ -65,6 +65,11 @@ if not exist "%SOURCE%\app_windows.py" (
     pause
     exit /b 1
 )
+if not exist "%SOURCE%\app_local2.py" (
+    echo ERROR: app_local2.py was not found in the downloaded project.
+    pause
+    exit /b 1
+)
 
 echo [4/6] Updating local project safely...
 if not exist "%TARGET%" mkdir "%TARGET%" >nul 2>&1
@@ -77,7 +82,12 @@ if %RC% GEQ 8 (
 )
 
 if not exist "%TARGET%\app_windows.py" (
-    echo ERROR: app_windows.py is still missing after update.
+    echo ERROR: app_windows.py is missing after update.
+    pause
+    exit /b 1
+)
+if not exist "%TARGET%\app_local2.py" (
+    echo ERROR: app_local2.py is missing after update.
     pause
     exit /b 1
 )
@@ -93,7 +103,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [6/6] Starting the checker...
+echo [6/6] Starting Local V2...
 echo.
 echo Project folder:
 echo %TARGET%
