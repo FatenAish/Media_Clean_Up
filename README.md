@@ -1,56 +1,48 @@
-# Media_Clean_Up — Shutterstock Article Image Checker
+# Shutterstock Article Image Checker
 
-Checks article images against Shutterstock and returns the matching Shutterstock asset URL when a likely match is found.
+A local Streamlit + Playwright system for checking article images against Shutterstock Search by Image.
 
-## Streamlit Cloud
+## No Shutterstock API required
 
-The hosted app now uses Shutterstock's **official Computer Vision API** instead of automating the Shutterstock website. This avoids the `Verification Required` challenge that blocks cloud/datacenter browsers.
+This project does **not** require a Shutterstock API key, API secret, or token.
 
-You need a Shutterstock API application with Computer Vision access enabled. The app accepts either:
+The checker is designed to run locally on Windows because Shutterstock currently shows its **Verification Required** challenge to Streamlit Community Cloud/datacenter browsers. The GitHub repository remains the source of the project, while the actual Shutterstock checking runs through your own visible Chrome browser and internet connection.
 
-- a Shutterstock API bearer token, or
-- an API key + API secret
+## What the system does
 
-You can enter credentials in the Streamlit sidebar, or add them as Streamlit secrets:
+- Accepts one article URL
+- Accepts multiple pasted URLs
+- Accepts Excel with an `Address` or `URL` column
+- Extracts feature and body images
+- Excludes obvious logos, icons, author images and social assets
+- Opens Shutterstock Search by Image automatically
+- Uploads each article image
+- Compares returned Shutterstock candidates with the article image
+- Returns `MATCH FOUND`, `POSSIBLE MATCH`, `NOT FOUND`, `MANUAL CHECK`, or `AUTOMATION ERROR`
+- Saves the actual Shutterstock asset URL when a match is detected
+- Exports results to Excel
 
-```toml
-SHUTTERSTOCK_API_TOKEN = "your-token"
-```
+## Recommended Python
 
-or:
+Use **Python 3.12**.
 
-```toml
-SHUTTERSTOCK_API_KEY = "your-key"
-SHUTTERSTOCK_API_SECRET = "your-secret"
-```
+Do not use the free-threaded Python 3.14t interpreter for this project because Playwright/greenlet can crash under that build.
 
-The official reverse-image flow used by the app is:
+## Install on Windows
 
-1. `POST /v2/cv/images`
-2. `GET /v2/cv/similar/images`
-3. Compare returned Shutterstock previews against the article image
-4. Return `MATCH FOUND`, `POSSIBLE MATCH`, or `NOT FOUND`
-5. Save the Shutterstock asset page URL and asset ID
+Download or clone this repository, then double-click:
 
-> Shutterstock requires Computer Vision access to be enabled for the API application. A normal website subscription alone does not automatically enable these API endpoints.
+`install_local.bat`
 
-## Local Windows mode
+This installs the Python dependencies and Playwright browser support.
 
-On Windows, `app.py` automatically loads `app_local.py`, which uses visible Chrome and Playwright.
+## Run
 
-Install once:
+Double-click:
 
-```bat
-install_local.bat
-```
+`run_local.bat`
 
-Run:
-
-```bat
-run_local.bat
-```
-
-Or manually:
+Or run manually:
 
 ```bat
 py -3.12 -m pip install -r requirements.txt
@@ -58,29 +50,30 @@ py -3.12 -m playwright install chromium
 py -3.12 -m streamlit run app.py
 ```
 
-Use Python **3.12**, not the free-threaded `3.14t` build.
+The Streamlit interface opens in your browser. A separate visible Chrome window is used for Shutterstock automation.
 
-## Inputs
+## Shutterstock verification
 
-The app accepts:
+If Shutterstock displays its slider / Verification Required screen in the visible Chrome window, complete it manually. The app waits for verification to finish and then continues automatically.
 
-- one article URL
-- multiple pasted URLs
-- Excel with an `Address` or `URL` column
+The app does not bypass CAPTCHA or Shutterstock security verification.
 
-## Output
+## Main files
 
-The report includes:
+- `app.py` — main entry point
+- `app_local.py` — local Shutterstock automation
+- `requirements.txt` — Python dependencies
+- `install_local.bat` — one-time Windows setup
+- `run_local.bat` — starts the checker
 
-- Article URL
-- Article title
-- Image position
-- Article image URL
-- Shutterstock status
-- Shutterstock asset URL
-- Shutterstock asset ID
-- Confidence
-- Number of API results
-- Notes
+## Excel input example
 
-The results can be downloaded as Excel.
+```text
+Address
+https://www.bayut.com/mybayut/...
+https://www.bayut.com/mybayut/...
+```
+
+## Why the hosted Streamlit Cloud page does not perform the check
+
+Shutterstock challenges the cloud/datacenter browser before Search by Image can load. Because the user does not have Shutterstock API access, the reliable free workflow is to keep the Streamlit UI local and let Playwright control the user's own Chrome session.
