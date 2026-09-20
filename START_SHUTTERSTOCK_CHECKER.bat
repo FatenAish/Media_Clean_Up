@@ -60,17 +60,14 @@ if errorlevel 1 (
     exit /b 1
 )
 
-if not exist "%SOURCE%\app_local.py" (
-    echo ERROR: app_local.py was not found in the downloaded project.
+if not exist "%SOURCE%\app_windows.py" (
+    echo ERROR: app_windows.py was not found in the downloaded project.
     pause
     exit /b 1
 )
 
 echo [4/6] Updating local project safely...
 if not exist "%TARGET%" mkdir "%TARGET%" >nul 2>&1
-
-rem Do NOT delete the existing folder. Windows may have it open from the prior run.
-rem Copy the fresh GitHub files over it instead, while preserving the browser profile in work\.
 robocopy "%SOURCE%" "%TARGET%" /E /R:3 /W:1 /XD work .git __pycache__ /XF *.pyc >nul
 set "RC=%ERRORLEVEL%"
 if %RC% GEQ 8 (
@@ -79,8 +76,8 @@ if %RC% GEQ 8 (
     exit /b 1
 )
 
-if not exist "%TARGET%\app_local.py" (
-    echo ERROR: app_local.py is still missing after update.
+if not exist "%TARGET%\app_windows.py" (
+    echo ERROR: app_windows.py is still missing after update.
     pause
     exit /b 1
 )
@@ -104,7 +101,7 @@ echo.
 echo Keep this window open while using the checker.
 echo.
 
-py -3.12 -m streamlit run app_local.py --server.address localhost --server.port 8501
+py -3.12 -m streamlit run app_windows.py --server.address localhost --server.port 8501
 
 echo.
 echo Streamlit stopped.
