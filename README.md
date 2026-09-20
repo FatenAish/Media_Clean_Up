@@ -1,84 +1,86 @@
-# Shutterstock Article Image Checker
+# Media_Clean_Up — Shutterstock Article Image Checker
 
-A Streamlit + Playwright system for checking article images against Shutterstock Search by Image.
+Checks article images against Shutterstock and returns the matching Shutterstock asset URL when a likely match is found.
 
-## Important
+## Streamlit Cloud
 
-Shutterstock is currently showing **Verification Required** to Streamlit Community Cloud / datacenter browsers. Because of that, the reliable setup is to run this project **locally on Windows** while Playwright controls your visible Chrome browser.
+The hosted app now uses Shutterstock's **official Computer Vision API** instead of automating the Shutterstock website. This avoids the `Verification Required` challenge that blocks cloud/datacenter browsers.
 
-The GitHub repository remains the source of the project; you simply run it from your PC.
+You need a Shutterstock API application with Computer Vision access enabled. The app accepts either:
 
-## What the system does
+- a Shutterstock API bearer token, or
+- an API key + API secret
 
-- Accepts one article URL
-- Accepts multiple pasted URLs
-- Accepts Excel with an `Address` or `URL` column
-- Extracts the feature image and article body images
-- Excludes obvious logos, icons, author images and social assets
-- Opens Shutterstock Search by Image
-- Uploads each article image automatically
-- Checks returned Shutterstock candidate images
-- Returns:
-  - `MATCH FOUND`
-  - `POSSIBLE MATCH`
-  - `NOT FOUND`
-  - `MANUAL CHECK`
-  - `AUTOMATION ERROR`
-- Saves the actual Shutterstock image page URL when a match is found
-- Exports results to Excel
+You can enter credentials in the Streamlit sidebar, or add them as Streamlit secrets:
 
-## Recommended Python
+```toml
+SHUTTERSTOCK_API_TOKEN = "your-token"
+```
 
-Use **Python 3.12**.
+or:
 
-Do not use the free-threaded Python 3.14t interpreter for this project because Playwright/greenlet may crash under that build.
+```toml
+SHUTTERSTOCK_API_KEY = "your-key"
+SHUTTERSTOCK_API_SECRET = "your-secret"
+```
 
-## Install on Windows
+The official reverse-image flow used by the app is:
 
-Clone or download this repository, then double-click:
+1. `POST /v2/cv/images`
+2. `GET /v2/cv/similar/images`
+3. Compare returned Shutterstock previews against the article image
+4. Return `MATCH FOUND`, `POSSIBLE MATCH`, or `NOT FOUND`
+5. Save the Shutterstock asset page URL and asset ID
 
-`install_local.bat`
+> Shutterstock requires Computer Vision access to be enabled for the API application. A normal website subscription alone does not automatically enable these API endpoints.
 
-That installs the Python requirements and Playwright browser support.
+## Local Windows mode
 
-## Run
+On Windows, `app.py` automatically loads `app_local.py`, which uses visible Chrome and Playwright.
 
-Double-click:
-
-`run_local.bat`
-
-Or run manually:
+Install once:
 
 ```bat
+install_local.bat
+```
+
+Run:
+
+```bat
+run_local.bat
+```
+
+Or manually:
+
+```bat
+py -3.12 -m pip install -r requirements.txt
+py -3.12 -m playwright install chromium
 py -3.12 -m streamlit run app.py
 ```
 
-The Streamlit interface opens in your browser. A separate visible Chrome window is used for Shutterstock automation.
+Use Python **3.12**, not the free-threaded `3.14t` build.
 
-## Shutterstock verification
+## Inputs
 
-If Shutterstock displays its slider / Verification Required screen in the visible Chrome window, complete it manually. The app waits for the verification to finish and then continues automatically.
+The app accepts:
 
-The app does not bypass CAPTCHAs or security verification.
+- one article URL
+- multiple pasted URLs
+- Excel with an `Address` or `URL` column
 
-## Main files
+## Output
 
-- `app.py` — main entry point; routes Windows users to the working local app
-- `app_local.py` — full local automation system
-- `requirements.txt` — Python dependencies
-- `install_local.bat` — one-time Windows setup
-- `run_local.bat` — starts the app
+The report includes:
 
-## Excel input example
+- Article URL
+- Article title
+- Image position
+- Article image URL
+- Shutterstock status
+- Shutterstock asset URL
+- Shutterstock asset ID
+- Confidence
+- Number of API results
+- Notes
 
-```text
-Address
-https://www.bayut.com/mybayut/...
-https://www.bayut.com/mybayut/...
-```
-
-## Why Streamlit Cloud is not used for the checking step
-
-The hosted Streamlit server is receiving Shutterstock's Verification Required challenge before Search by Image can load. This is an external anti-bot/security restriction from Shutterstock, not an article-image matching issue.
-
-Running the Streamlit app locally keeps the same interface while the Shutterstock requests originate through your normal browser session and connection.
+The results can be downloaded as Excel.
