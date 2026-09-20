@@ -1,14 +1,19 @@
 import os
+from pathlib import Path
+import runpy
 import streamlit as st
 
 # Main entry point.
-# This project intentionally does NOT use the Shutterstock API.
-# Shutterstock blocks Streamlit Community Cloud/datacenter browsers with its
-# Verification Required challenge, so the working checker runs locally on
-# Windows and controls the user's visible Chrome browser.
+# No Shutterstock API is required.
+#
+# On Windows, execute app_local.py with runpy on EVERY Streamlit rerun.
+# Using `from app_local import *` caused a blank page after Streamlit reran
+# because Python cached the imported module and its Streamlit UI code did not
+# execute again.
 
 if os.name == "nt":
-    from app_local import *  # noqa: F401,F403
+    local_app = Path(__file__).resolve().with_name("app_local.py")
+    runpy.run_path(str(local_app), run_name="__main__")
 else:
     st.set_page_config(
         page_title="Shutterstock Article Image Checker",
@@ -36,9 +41,7 @@ The Streamlit interface is still used, but the browser automation runs through *
 Or run manually:
 
 ```bat
-py -3.12 -m pip install -r requirements.txt
-py -3.12 -m playwright install chromium
-py -3.12 -m streamlit run app.py
+py -3.12 -m streamlit run app_local.py
 ```
 
 The local checker supports:
