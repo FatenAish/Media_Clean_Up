@@ -1,42 +1,55 @@
-# Shutterstock Article Image Checker
+# Shutterstock Article Image Checker — Local V2
 
-A local Streamlit + Playwright system for checking article images against Shutterstock Search by Image.
+A local Streamlit + Playwright system for checking Bayut/MyBayut article images against Shutterstock Search by Image.
 
 ## No Shutterstock API required
 
 This project does **not** require a Shutterstock API key, API secret, or token.
 
-The checker is designed to run locally on Windows because Shutterstock currently shows its **Verification Required** challenge to Streamlit Community Cloud/datacenter browsers. The GitHub repository remains the source of the project, while the actual Shutterstock checking runs through your own visible Chrome browser and internet connection.
+The checker runs locally on Windows because Shutterstock challenges Streamlit Community Cloud/datacenter browsers with its **Verification Required** screen. The actual Shutterstock check runs through the user's visible Chrome browser and normal internet connection.
 
-## What the system does
+## Current V2 flow
 
-- Accepts one article URL
-- Accepts multiple pasted URLs
-- Accepts Excel with an `Address` or `URL` column
-- Extracts feature and body images
-- Excludes obvious logos, icons, author images and social assets
-- Opens Shutterstock Search by Image automatically
-- Uploads each article image
-- Compares returned Shutterstock candidates with the article image
-- Returns `MATCH FOUND`, `POSSIBLE MATCH`, `NOT FOUND`, `MANUAL CHECK`, or `AUTOMATION ERROR`
-- Saves the actual Shutterstock asset URL when a match is detected
-- Exports results to Excel
+- Accept one article URL
+- Accept multiple pasted URLs
+- Accept Excel with an `Address` or `URL` column
+- Extract feature and body images from Bayut/MyBayut articles
+- Exclude obvious logos, icons, author images and social assets
+- Open Shutterstock Search by Image in visible Chrome
+- Try direct file inputs, Search by Image controls, camera controls, search-bar controls, frame inputs and upload areas
+- Upload each article image automatically when Shutterstock exposes a usable upload control
+- Compare returned Shutterstock candidate images with the article image
+- Return `MATCH FOUND`, `POSSIBLE MATCH`, `NOT FOUND`, `MANUAL CHECK`, or `AUTOMATION ERROR`
+- Save the actual Shutterstock asset URL when a match is detected
+- Export results to Excel
+- Capture the Shutterstock page when an automation failure occurs so the exact page state can be reviewed
+
+## Main files
+
+- `app.py` — main entry point
+- `app_windows.py` — Windows wrapper that configures the event loop Playwright needs
+- `app_local2.py` — current V2 Shutterstock automation checker
+- `app_local.py` — previous local checker kept for reference
+- `requirements.txt` — Python dependencies
+- `install_local.bat` — one-time installation helper
+- `run_local.bat` — starts the current V2 checker
+- `START_SHUTTERSTOCK_CHECKER.bat` — downloads/updates the latest GitHub version and starts it
 
 ## Recommended Python
 
 Use **Python 3.12**.
 
-Do not use the free-threaded Python 3.14t interpreter for this project because Playwright/greenlet can crash under that build.
+Do not use the free-threaded Python 3.14t interpreter for this project because Playwright/greenlet can fail under that build.
 
-## Install on Windows
+## Easiest way to run
 
-Download or clone this repository, then double-click:
+Double-click:
 
-`install_local.bat`
+`START_SHUTTERSTOCK_CHECKER.bat`
 
-This installs the Python dependencies and Playwright browser support.
+It stops an old checker on port 8501, downloads the latest GitHub project, updates the local folder, installs requirements and starts the Windows wrapper.
 
-## Run
+## Run from an existing project folder
 
 Double-click:
 
@@ -46,25 +59,14 @@ Or run manually:
 
 ```bat
 py -3.12 -m pip install -r requirements.txt
-py -3.12 -m playwright install chromium
-py -3.12 -m streamlit run app.py
+py -3.12 -m streamlit run app_windows.py --server.address localhost --server.port 8501
 ```
-
-The Streamlit interface opens in your browser. A separate visible Chrome window is used for Shutterstock automation.
 
 ## Shutterstock verification
 
-If Shutterstock displays its slider / Verification Required screen in the visible Chrome window, complete it manually. The app waits for verification to finish and then continues automatically.
+If Shutterstock displays its slider / Verification Required screen in the visible Chrome window, complete it manually. The checker waits and continues after the verification disappears.
 
 The app does not bypass CAPTCHA or Shutterstock security verification.
-
-## Main files
-
-- `app.py` — main entry point
-- `app_local.py` — local Shutterstock automation
-- `requirements.txt` — Python dependencies
-- `install_local.bat` — one-time Windows setup
-- `run_local.bat` — starts the checker
 
 ## Excel input example
 
@@ -74,6 +76,6 @@ https://www.bayut.com/mybayut/...
 https://www.bayut.com/mybayut/...
 ```
 
-## Why the hosted Streamlit Cloud page does not perform the check
+## Hosted Streamlit Cloud
 
-Shutterstock challenges the cloud/datacenter browser before Search by Image can load. Because the user does not have Shutterstock API access, the reliable free workflow is to keep the Streamlit UI local and let Playwright control the user's own Chrome session.
+The hosted Streamlit Cloud page is not used for the Shutterstock browser automation because Shutterstock challenges datacenter browsers. The reliable free workflow is local Windows + visible Chrome.
