@@ -1,0 +1,9 @@
+streamlit>=1.40
+playwright>=1.49
+requests>=2.32
+pandas>=2.2
+openpyxl>=3.1
+Pillow>=11.0
+ImageHash>=4.3
+opencv-python>=4.10
+numpy>=2.0
